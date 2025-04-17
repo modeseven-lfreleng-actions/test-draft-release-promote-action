@@ -27,8 +27,40 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      # Promote release in test workflow
+      - name: "Create test releases"
+        shell: bash
+        run: |
+          # Create test releases
+          gh release create v9.9.0 --notes "test release"
+          gh release create -d v9.9.1 --notes "test draft release"
+          gh release create -d v9.9.2 --notes "test latest draft release"
+        # Production release URL example:
+        # https://github.com/lfreleng-actions/draft-release-promote-action/releases/tag/v9.9.9
+
+      # Promote release using local action
       - name: "Running local action: ${{ github.repository }}"
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: ./
+
+      # Validate draft release promotion
+      - name: "Validate draft release promotion"
+        shell: bash
+        run: |
+          # Validate draft release promotion
+          # shellcheck disable=SC2086
+          URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.1"
+          if (wget -q -spider $URL); then
+            echo "Release was successfully promoted ✅"
+          else
+            echo "Error: release was NOT promoted successfully ❌"
+            exit 1
+          fi
+
+      - name: "Delete test releases"
+        shell: bash
+        run: |
+          # Delete test releases
+          gh release delete -y v9.9.0
+          gh release delete -y v9.9.1
+          gh release delete -y v9.9.2
