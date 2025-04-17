@@ -28,6 +28,17 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: "Purge any previous test releases"
+        continue-on-error: true
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Delete test releases
+          gh release delete -y v9.9.0 || true
+          gh release delete -y v9.9.1 || true
+          gh release delete -y v9.9.2 || true
+
       - name: "Create test releases"
         shell: bash
         env:
@@ -53,7 +64,7 @@ jobs:
           # Validate draft release promotion
           # shellcheck disable=SC2086
           URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.1"
-          if (wget -q -spider $URL); then
+          if (wget -q --spider $URL); then
             echo "Release was successfully promoted ✅"
           else
             echo "Error: release was NOT promoted successfully ❌"
