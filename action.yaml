@@ -53,10 +53,10 @@ runs:
           REVERSE='|reverse'
         fi
 
-        if [ "${{ inputs.TAG }}" == 'true' ]; then
+        if [ -n "${{ inputs.tag }}" ]; then
           flags="| select(.tagName==${{ inputs.TAG }})"
         fi
-        if [ "${{ inputs.NAME }}" == 'true' ]; then
+        if [ -n "${{ inputs.name }}" ]; then
           flags="$flags | select(.name==${{ inputs.NAME }})"
         fi
 
