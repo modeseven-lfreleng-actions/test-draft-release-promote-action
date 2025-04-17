@@ -57,7 +57,7 @@ runs:
           flags="| select(.tagName == ${{ inputs.TAG }})"
         fi
         if [ -n "${{ inputs.name }}" ]; then
-          flags=$flags | select(.name == ${{ inputs.NAME }})"
+          flags="$flags | select(.name == ${{ inputs.NAME }})"
         fi
 
         echo "Selection/flags: $flags"
