@@ -3,11 +3,11 @@
 # SPDX-FileCopyrightText: 2025 The Linux Foundation
 -->
 
-# 🛠️ Template Action
+# ⏫ Promote Draft Release
 
-This is a template for the other actions in this Github organisation.
+Promotes a draft GitHub release to a full release.
 
-## actions-template
+## draft-release-promote-action
 
 ## Usage Example
 
@@ -15,11 +15,10 @@ This is a template for the other actions in this Github organisation.
 
 ```yaml
 steps:
-  - name: "Action template"
-    id: action-template
-    uses: lfreleng-actions/actions-template@main
-    with:
-      input: "placeholder"
+  - name: "Promote Draft Release"
+    uses: lfreleng-actions/draft-release-promote-action@main
+    env:
+      GH_TOKEN: ${{ github.token }}
 ```
 
 <!-- markdownlint-enable MD046 -->
@@ -28,22 +27,46 @@ steps:
 
 <!-- markdownlint-disable MD013 -->
 
-| Variable Name | Required | Description  |
-| ------------- | -------- | ------------ |
-| INPUT         | False    | Action input |
-
-<!-- markdownlint-enable MD013 -->
-
-## Outputs
-
-<!-- markdownlint-disable MD013 -->
-
-| Variable Name | Description   |
-| ------------- | ------------- |
-| OUTPUT        | Action output |
+| Variable Name | Required | Description                      |
+| ------------- | -------- | -------------------------------- |
+| TAG           | False    | Tag of draft release to promote  |
+| NAME          | False    | Name of draft release to promote |
 
 <!-- markdownlint-enable MD013 -->
 
 ## Implementation Details
+
+Uses the GitHub CLI command:
+
+`gh release list --json name,tagName,createdAt,isDraft`
+
+Example output:
+
+```json
+[
+  {
+    "createdAt": "2025-04-16T04:37:36Z",
+    "isDraft": true,
+    "name": "Draft release v0.1.1",
+    "tagName": "v0.1.1"
+  },
+  {
+    "createdAt": "2025-04-16T04:32:37Z",
+    "isDraft": true,
+    "name": "Draft release v0.1.0",
+    "tagName": "v0.1.0"
+  },
+  {
+    "createdAt": "2025-04-16T04:18:11Z",
+    "isDraft": false,
+    "name": "Release v0.0.1",
+    "tagName": "v0.0.1"
+  }
+]
+```
+
+This is then passed through the JQ command:
+
+`jq` # Placeholder
 
 ## Notes

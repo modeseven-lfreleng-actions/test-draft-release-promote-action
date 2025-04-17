@@ -2,38 +2,44 @@
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-FileCopyrightText: 2025 The Linux Foundation
 
-# actions-template
-name: "🛠️ Actions Template"
-description: "Description of action"
-# Any relevant notes/observations can go here
+# promote-draft-release-action
+name: "⏫ Promote Draft Release"
+description: "Promotes a draft GitHub release"
 
+# When no inputs specified, defaults to the most recent/latest draft
 inputs:
-  INPUT:
-    description: "Description of input"
+  # Optional
+  TAG:
+    description: 'Tag of draft release to promote'
     required: false
-    type: string
-    default: "input"
-
-outputs:
-  OUTPUT:
-    description: "Description of output"
-    value: ${{ steps.code.outputs.output }}
+    type: 'string'
+  NAME:
+    description: 'Name of draft release to promote'
+    required: false
+    type: 'string'
+  GITHUB_TOKEN:
+    description: 'GitHub Token with write content permissions'
+    required: true
+    type: 'string'
 
 runs:
   using: "composite"
   steps:
-    - name: "Friendly Name"
-      id: code
+    - name: "Capture draft releases in repository"
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
       shell: bash
       run: |
-        # Friendly Name
-        INPUT="${{ inputs.input }}"
-        if [ -z "$INPUT" ]; then
-          echo "Error: mandatory input INPUT was not set/configured ❌"
-          exit 1
+        # Capture draft releases in repository
+
+        # Note: GitHub token must have permissions: "content: write
+        if [ -z "$GITHUB_TOKEN" ]; then
+          echo "Error: GitHub token not passed to action ❌"; exit 1
+        else
+          echo "Token: $GITHUB_TOKEN"
         fi
 
-        echo "output=$INPUT" >> "$GITHUB_ENV"
-        echo "output=$INPUT" >> "$GITHUB_OUTPUT"
-        echo "Action received a valid input: $INPUT ✅"
-        echo "Action received a valid input: $INPUT ✅" >> "$GITHUB_STEP_SUMMARY"
+        # Use of GitHub CLI requires a valid token
+        gh release list --json name,tagName,createdAt,isDraft
+        gh release list
+        echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
