@@ -17,20 +17,27 @@ Promotes a draft GitHub release to a full release.
 steps:
   - name: "Promote Draft Release"
     uses: lfreleng-actions/draft-release-promote-action@main
-    env:
-      GH_TOKEN: ${{ github.token }}
+    with:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 <!-- markdownlint-enable MD046 -->
+
+## Token Permissions
+
+The token needs the following permissions:
+
+`contents: write`
 
 ## Inputs
 
 <!-- markdownlint-disable MD013 -->
 
-| Variable Name | Required | Description                      |
-| ------------- | -------- | -------------------------------- |
-| TAG           | False    | Tag of draft release to promote  |
-| NAME          | False    | Name of draft release to promote |
+| Variable Name | Required | Description                            |
+| ------------- | -------- | -------------------------------------- |
+| TOKEN         | True     | GitHub token with relevant permissions |
+| TAG           | False    | Tag of draft release to promote        |
+| NAME          | False    | Name of draft release to promote       |
 
 <!-- markdownlint-enable MD013 -->
 
