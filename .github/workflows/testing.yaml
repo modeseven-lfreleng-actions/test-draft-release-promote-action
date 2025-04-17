@@ -6,6 +6,7 @@ name: "Test GitHub Action 🧪"
 
 # yamllint disable-line rule:truthy
 on:
+  workflow_dispatch:
   push:
     branches: ["main"]
   pull_request:
@@ -29,6 +30,8 @@ jobs:
 
       - name: "Create test releases"
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Create test releases
           gh release create v9.9.0 --notes "test release"
@@ -59,6 +62,8 @@ jobs:
 
       - name: "Delete test releases"
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           # Delete test releases
           gh release delete -y v9.9.0
