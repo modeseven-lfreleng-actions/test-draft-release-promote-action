@@ -22,6 +22,11 @@ inputs:
     description: 'Name of draft release to promote'
     required: false
     type: 'string'
+  REVERSE_SORT:
+    description: 'Reverse sorting order'
+    required: false
+    type: 'boolean'
+    default: 'false'
 
 runs:
   using: "composite"
@@ -40,9 +45,24 @@ runs:
           echo "Token: $GITHUB_TOKEN"
         fi
 
-        # Use of GitHub CLI requires a valid token
-        release_list=$(gh release list)
         releases=$(gh release list --json name,tagName,createdAt,isDraft)
+
+        # Build JQ query string based on inputs
+        if [ "${{ inputs.REVERSE_SORT }}" == 'true' ]; then
+          REVERSE='|reverse'
+        fi
+
+        if [ "${{ inputs.TAG }}" == 'true' ]; then
+          flags="| select(.tagName==${{ inputs.TAG }})"
+        fi
+        if [ "${{ inputs.NAME }}" == 'true' ]; then
+          flags="$flags | select(.name==${{ inputs.NAME }})"
+        fi
+
+        sorted=$(echo "$releases" |\
+        jq "sort_by(.tagName)$REVERSE.[0] | select(.isDraft==true) $flags")
+
+        # Use of GitHub CLI requires a valid token
         echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
-        echo "$release_list"
-        echo "$releases"
+        echo "$sorted"
+        echo "$sorted" >> "$GITHUB_STEP_SUMMARY"
