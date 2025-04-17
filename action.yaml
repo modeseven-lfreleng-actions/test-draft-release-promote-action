@@ -5,9 +5,14 @@
 # promote-draft-release-action
 name: "⏫ Promote Draft Release"
 description: "Promotes a draft GitHub release"
+# When no inputs specified, defaults to the most recent
 
-# When no inputs specified, defaults to the most recent/latest draft
 inputs:
+  # Mandatory
+  TOKEN:
+    description: 'GitHub Token with write content permissions'
+    required: true
+    type: 'string'
   # Optional
   TAG:
     description: 'Tag of draft release to promote'
@@ -17,17 +22,18 @@ inputs:
     description: 'Name of draft release to promote'
     required: false
     type: 'string'
-  GITHUB_TOKEN:
-    description: 'GitHub Token with write content permissions'
-    required: true
-    type: 'string'
+  REVERSE_SORT:
+    description: 'Reverse sorting order'
+    required: false
+    type: 'boolean'
+    default: 'false'
 
 runs:
   using: "composite"
   steps:
     - name: "Capture draft releases in repository"
       env:
-        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.TOKEN }}
       shell: bash
       run: |
         # Capture draft releases in repository
@@ -39,7 +45,27 @@ runs:
           echo "Token: $GITHUB_TOKEN"
         fi
 
+        releases=$(gh release list --json name,tagName,createdAt,isDraft)
+        echo "$releases"
+
+        # Build JQ query string based on inputs
+        if [ "${{ inputs.REVERSE_SORT }}" == 'true' ]; then
+          REVERSE='|reverse'
+        fi
+
+        if [ "${{ inputs.TAG }}" == 'true' ]; then
+          flags="| select(.tagName==${{ inputs.TAG }})"
+        fi
+        if [ "${{ inputs.NAME }}" == 'true' ]; then
+          flags="$flags | select(.name==${{ inputs.NAME }})"
+        fi
+
+        echo "Selection/flags: $flags"
+
+        sorted=$(echo "$releases" |\
+        jq "sort_by(.tagName)$REVERSE.[0] | select(.isDraft==true) $flags")
+
         # Use of GitHub CLI requires a valid token
-        gh release list --json name,tagName,createdAt,isDraft
-        gh release list
         echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
+        echo "$sorted"
+        echo "$sorted" >> "$GITHUB_STEP_SUMMARY"

@@ -18,7 +18,7 @@ steps:
   - name: "Promote Draft Release"
     uses: lfreleng-actions/draft-release-promote-action@main
     with:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 <!-- markdownlint-enable MD046 -->

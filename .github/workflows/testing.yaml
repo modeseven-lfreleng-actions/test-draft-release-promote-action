@@ -48,7 +48,7 @@ jobs:
           # Create test releases
           gh release create v9.9.0 --notes "test release"
           gh release create -d v9.9.2 --notes "test latest draft release"
-          gh release create -d v9.9.1 --latest --notes "test draft release"
+          gh release create -d v9.9.1 --notes "test draft release"
           gh release create -d v9.9.3 --notes "test latest draft release"
         # Production release URL example:
         # https://github.com/lfreleng-actions/draft-release-promote-action/releases/tag/v9.9.9
@@ -56,7 +56,21 @@ jobs:
       # Promote release using local action
       - name: "Running local action: ${{ github.repository }}"
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        uses: ./
+
+      # Promote release using local action
+      - name: "Running local action: ${{ github.repository }}"
+        with:
+          TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          TAG: 'v9.9.1'
+        uses: ./
+
+      # Promote release using local action
+      - name: "Running local action: ${{ github.repository }}"
+        with:
+          TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          REVERSE_SORT: "true"
         uses: ./
 
       # Validate draft release promotion
@@ -82,4 +96,4 @@ jobs:
           gh release delete -y v9.9.0
           gh release delete -y v9.9.1
           gh release delete -y v9.9.2
-          gh release delete -y v9.9.3 || true
+          gh release delete -y v9.9.3
