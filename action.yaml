@@ -53,10 +53,10 @@ runs:
           REVERSE='|reverse'
         fi
 
-        if [ "${{ inputs.TAG }}" == 'true' ]; then
+        if [ -n "${{ inputs.tag }}" ]; then
           flags="| select(.tagName==${{ inputs.TAG }})"
         fi
-        if [ "${{ inputs.NAME }}" == 'true' ]; then
+        if [ -n "${{ inputs.name }}" ]; then
           flags="$flags | select(.name==${{ inputs.NAME }})"
         fi
 
@@ -64,8 +64,14 @@ runs:
 
         sorted=$(echo "$releases" |\
         jq "sort_by(.tagName)$REVERSE.[0] | select(.isDraft==true) $flags")
+        echo "$sorted"
+
+        if [ -z "$sorted" ]; then
+          echo "Error: no draft releases matched provided inputs ❌"
+          # exit 1 # Re-instate when finished debugging
+          exit 0
+        fi
 
         # Use of GitHub CLI requires a valid token
         echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
-        echo "$sorted"
         echo "$sorted" >> "$GITHUB_STEP_SUMMARY"

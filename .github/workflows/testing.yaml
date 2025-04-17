@@ -60,14 +60,14 @@ jobs:
         uses: ./
 
       # Promote release using local action
-      - name: "Running local action: ${{ github.repository }}"
+      - name: "Running local action: ${{ github.repository }} [Specific Tag]"
         with:
           TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           TAG: 'v9.9.1'
         uses: ./
 
       # Promote release using local action
-      - name: "Running local action: ${{ github.repository }}"
+      - name: "Running local action: ${{ github.repository }} [Reverse Sort]"
         with:
           TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           REVERSE_SORT: "true"
