@@ -46,6 +46,7 @@ runs:
         fi
 
         releases=$(gh release list --json name,tagName,createdAt,isDraft)
+        echo "$releases"
 
         # Build JQ query string based on inputs
         if [ "${{ inputs.REVERSE_SORT }}" == 'true' ]; then
@@ -58,6 +59,8 @@ runs:
         if [ "${{ inputs.NAME }}" == 'true' ]; then
           flags="$flags | select(.name==${{ inputs.NAME }})"
         fi
+
+        echo "Selection/flags: $flags"
 
         sorted=$(echo "$releases" |\
         jq "sort_by(.tagName)$REVERSE.[0] | select(.isDraft==true) $flags")
