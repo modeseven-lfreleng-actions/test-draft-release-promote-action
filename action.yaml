@@ -54,16 +54,16 @@ runs:
         fi
 
         if [ -n "${{ inputs.tag }}" ]; then
-          flags="| select(.tagName==${{ inputs.TAG }})"
+          flags="| select(.tagName == ${{ inputs.TAG }})"
         fi
         if [ -n "${{ inputs.name }}" ]; then
-          flags="$flags | select(.name==${{ inputs.NAME }})"
+          flags=$flags | select(.name == ${{ inputs.NAME }})"
         fi
 
         echo "Selection/flags: $flags"
 
         sorted=$(echo "$releases" |\
-        jq "sort_by(.tagName)$REVERSE.[0] | select(.isDraft==true) $flags")
+        jq "sort_by(.tagName)$REVERSE.[] | select(.isDraft==true) $flags")
         echo "$sorted"
 
         if [ -z "$sorted" ]; then
