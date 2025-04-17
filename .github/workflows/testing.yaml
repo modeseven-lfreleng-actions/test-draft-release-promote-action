@@ -56,7 +56,7 @@ jobs:
       # Promote release using local action
       - name: "Running local action: ${{ github.repository }}"
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
         uses: ./
 
       # Validate draft release promotion
@@ -82,4 +82,4 @@ jobs:
           gh release delete -y v9.9.0
           gh release delete -y v9.9.1
           gh release delete -y v9.9.2
-          gh release delete -y v9.9.3 || true
+          gh release delete -y v9.9.3
