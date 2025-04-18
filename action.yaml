@@ -85,29 +85,28 @@ runs:
         fi
 
         # Example: jq "sort_by(.tagName) | select(.isDraft==true) $flags")
+        if [ -n "$sort_flags" ]; then
+          echo "Sort flags/options: $sort_flags 🏴‍☠️"
+        fi
 
-        sorted=$(echo "$releases" |\
-          $jq_cmd \"$sort_flags | select(.isDraft==true))\""
-        echo "$sorted"
+        sorted_data=$(echo "$releases" |\
+          $jq_cmd \"$sort_flags | select(.isDraft==true))\"")
+        echo "$sorted_data"
 
         if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
           echo "Sorted GitHub API query data 🐞"
           echo "$sorted_data"
         fi
 
-        if [ -n "$flags" ]; then
-          echo "Selection/flags for jq: $flags 🏴‍☠️"
-        fi
-
         draft_release=$(echo "$sorted_data" | jq '.[0]')
 
-        if [ -z "$draft_releases" ]; then
+        if [ -z "$draft_release" ]; then
           echo "Error: no draft releases matched provided inputs ❌"
           # exit 1 # Re-instate when finished debugging
           exit 0
         fi
         echo "Draft release:"
-        echo "$draft_releases"
+        echo "$draft_release"
 
         # Use of GitHub CLI requires a valid token
         echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
