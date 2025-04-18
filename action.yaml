@@ -77,9 +77,7 @@ runs:
           echo "$release_data"
         fi
 
-        if [ "${{ inputs.SORT_BY }}" == "none" ]; then
-          sort_flags=""
-        elif [ [ "${{ inputs.SORT_BY }}" != "none" ] ]; then
+        if [ "${{ inputs.SORT_BY }}" != "none" ]; then
           echo "Sorting by: ${{ inputs.SORT_BY }}"
           sort_flags="sort_by(.${{ inputs.SORT_BY }})"
         fi
@@ -107,7 +105,7 @@ runs:
 
         release_url=$(gh release edit "$tag" --draft=false)
         if [ $# -eq 0 ]; then
-          echo "Promoted release: $release_url"
+          echo "Release promoted: $release_url"
         else
           echo "Error: GitHub CLI failed to promote release ❌"; exit 1
         fi
