@@ -38,6 +38,8 @@ The token needs the following permissions:
 | TOKEN         | True     | GitHub token with relevant permissions |
 | TAG           | False    | Tag of draft release to promote        |
 | NAME          | False    | Name of draft release to promote       |
+| SORT_BY       | False    | Sort by this json element parameter    |
+| SORT_REVERSE  | False    | Reverse the sort order of results      |
 
 <!-- markdownlint-enable MD013 -->
 

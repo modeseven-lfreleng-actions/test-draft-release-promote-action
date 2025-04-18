@@ -4,8 +4,8 @@
 
 # promote-draft-release-action
 name: "⏫ Promote Draft Release"
-description: "Promotes a draft GitHub release"
-# When no inputs specified, defaults to the most recent
+description: "Promotes a draft GitHub release to a full release"
+# When no inputs specified, defaults to most recent draft release
 
 inputs:
   # Mandatory
@@ -22,7 +22,12 @@ inputs:
     description: 'Name of draft release to promote'
     required: false
     type: 'string'
-  REVERSE_SORT:
+  SORT_BY:
+    description: 'Sort releases by this field'
+    required: false
+    type: 'string'
+    default: 'none'
+  SORT_REVERSE:
     description: 'Reverse sorting order'
     required: false
     type: 'boolean'
@@ -38,40 +43,71 @@ runs:
       run: |
         # Capture draft releases in repository
 
-        # Note: GitHub token must have permissions: "content: write
+        # Disable script debugging prior to release
+        set -vx
+
+        # Note: GitHub token must have permissions: "content: write"
         if [ -z "$GITHUB_TOKEN" ]; then
           echo "Error: GitHub token not passed to action ❌"; exit 1
-        else
-          echo "Token: $GITHUB_TOKEN"
         fi
 
-        releases=$(gh release list --json name,tagName,createdAt,isDraft)
-        echo "$releases"
-
-        # Build JQ query string based on inputs
-        if [ "${{ inputs.REVERSE_SORT }}" == 'true' ]; then
-          REVERSE='|reverse'
+        # Check for JQ command
+        jq_cmd=$(which jq)
+        if [ ! -x "$jq_cmd" ]; then
+          echo "Error: jq command not found ❌"; exit 1
         fi
 
-        if [ -n "${{ inputs.tag }}" ]; then
-          flags="| select(.tagName == ${{ inputs.TAG }})"
-        fi
-        if [ -n "${{ inputs.name }}" ]; then
-          flags="$flags | select(.name == ${{ inputs.NAME }})"
+        # Valid sort options provided by:
+        #  gh release list --json [2025-04-18]
+        #   createdAt
+        #   isDraft
+        #   isLatest
+        #   isPrerelease
+        #   name
+        #   publishedAt
+        #   tagName
+
+        release_data=$(gh release list --json \
+          createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName)
+        if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
+          echo "Raw GitHub API query data 🐞"
+          echo "$release_data"
         fi
 
-        echo "Selection/flags: $flags"
+        if [ -n "${{ inputs.SORT_BY }}" ]; then
+          echo "Sorting by: ${{ inputs.SORT_BY }}"
+          sort_flags="sort_by(.${{ inputs.SORT_BY }})"
+        elif [ -n "${{ inputs.SORT_REVERSE }}" ]; then
+          echo "Reverse sort order requested 🔄"
+          sort_flags="$sort_flags|reverse"
+        fi
+
+        json_cmd="$jq_cmd \"$sort_flags"
+
+        # Example: jq "sort_by(.tagName) | select(.isDraft==true) $flags")
 
         sorted=$(echo "$releases" |\
-        jq "sort_by(.tagName)$REVERSE.[] | select(.isDraft==true) $flags")
+          $json_cmd | select(.isDraft==true))\""
         echo "$sorted"
 
-        if [ -z "$sorted" ]; then
+        if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
+          echo "Sorted GitHub API query data 🐞"
+          echo "$sorted_data"
+        fi
+
+        if [ -n "$flags" ]; then
+          echo "Selection/flags for jq: $flags 🏴‍☠️"
+        fi
+
+        draft_release=$(echo "$sorted_data" | jq '.[0]')
+
+        if [ -z "$draft_releases" ]; then
           echo "Error: no draft releases matched provided inputs ❌"
           # exit 1 # Re-instate when finished debugging
           exit 0
         fi
+        echo "Draft release:"
+        echo "$draft_releases"
 
         # Use of GitHub CLI requires a valid token
         echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
-        echo "$sorted" >> "$GITHUB_STEP_SUMMARY"
