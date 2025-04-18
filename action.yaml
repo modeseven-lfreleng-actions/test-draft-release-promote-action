@@ -87,9 +87,9 @@ runs:
 
         if [ -n "$sort_flags" ]; then
           echo "Sort flags/options: $sort_flags ⛳︎"
-          sorted_data=$(echo "$releases" | $jq_cmd \"$sort_flags | select\(.isDraft==true\)\")
+          sorted_data=$(echo "$releases" | $jq_cmd \"$sort_flags | select(.isDraft==true)\")
         else
-          sorted_data=$(echo "$releases" | $jq_cmd "select\(.isDraft==true\)")
+          sorted_data=$(echo "$releases" | $jq_cmd \"select(.isDraft==true)\")
         fi
         echo "$sorted_data"
 
