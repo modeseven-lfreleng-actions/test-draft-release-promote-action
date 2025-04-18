@@ -79,10 +79,11 @@ runs:
 
         if [ "${{ inputs.SORT_BY }}" == "none" ]; then
           sort_flags=""
-        elif [ -n "${{ inputs.SORT_BY }}" ]; then
+        elif [ [ "${{ inputs.SORT_BY }}" != "none" ] ]; then
           echo "Sorting by: ${{ inputs.SORT_BY }}"
           sort_flags="sort_by(.${{ inputs.SORT_BY }})"
-        elif [ "${{ inputs.SORT_REVERSE }}" == 'true' ]; then
+        fi
+        if [ "${{ inputs.SORT_REVERSE }}" == 'true' ]; then
           echo "Reverse sort order requested 🔄"
           sort_flags="$sort_flags|reverse"
         fi
@@ -102,5 +103,15 @@ runs:
           echo "$draft_release"
         fi
 
+        tag=$(echo $draft_release | jq '.tagName' | sed 's:"::g')
+
+        release_url=$(gh release edit "$tag" --draft=false)
+        if [ $# -eq 0 ]; then
+          echo "Promoted release: $release_url"
+        else
+          echo "Error: GitHub CLI failed to promote release ❌"; exit 1
+        fi
+
         # Use of GitHub CLI requires a valid token
-        echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
+        echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
+        echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
