@@ -44,13 +44,28 @@ runs:
       run: |
         # Capture draft releases in repository
 
+        #SHELLCODESTART
+
         # Disable script debugging prior to release
         set -vx
 
-        # Note: GitHub token must have permissions: "content: write"
-        if [ -z "$GITHUB_TOKEN" ]; then
-          echo "Error: GitHub token not passed to action ❌"; exit 1
+        # Allows for testing from a local shell
+        if [ -z "$GITHUB_OUTPUT" ]; then
+          echo "Running from a shell, NOT workflow"
+          export GITHUB_STEP_SUMMARY="/dev/null"
+          export GITHUB_OUTPUT="/dev/null"
+          export GITHUB_ENV="/dev/null"
+          SORT_BY="none"
+          SORT_REVERSE="false"
+        else
+          SORT_BY="${{ inputs.SORT_BY }}"
+          SORT_REVERSE="${{ inputs.SORT_REVERSE }}"
         fi
+
+        # Note: GitHub token must have permissions: "content: write"
+        # if [ -z "$GITHUB_TOKEN" ]; then
+        #  echo "Error: GitHub token not passed to action ❌"; exit 1
+        #fi
 
         # Check for JQ command
         jq_cmd=$(which jq)
@@ -77,21 +92,19 @@ runs:
           echo "$release_data"
         fi
 
-        if [ "${{ inputs.SORT_BY }}" != "none" ]; then
-          echo "Sorting by: ${{ inputs.SORT_BY }}"
-          sort_flags="sort_by(.${{ inputs.SORT_BY }})"
+        if [ "$SORT_BY" != "none" ]; then
+          echo "Sorting by: $SORT_BY"
+          sort_flags="sort_by($SORT_BY)"
         fi
-        if [ "${{ inputs.SORT_REVERSE }}" == 'true' ]; then
+        if [ "$SORT_REVERSE" == 'true' ]; then
           echo "Reverse sort order requested 🔄"
           sort_flags="$sort_flags|reverse"
         fi
 
         if [ -n "$sort_flags" ]; then
           echo "Sort flags/options: $sort_flags ⛳︎"
-          draft_release=$(echo "$release_data" | $jq_cmd \".[0]$sort_flags | select\(.isDraft==true\)\")
-        else
-          draft_release=$(echo "$release_data" | $jq_cmd '.[0] | select(.isDraft==true)')
         fi
+        draft_release=$(jq -s "map(select(.isDraft == "true")) | first'
         echo "$draft_release"
 
         if [ -z "$draft_release" ]; then
@@ -113,3 +126,5 @@ runs:
         # Use of GitHub CLI requires a valid token
         echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
         echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
+
+        #SHELLCODEEND
