@@ -70,7 +70,9 @@ runs:
 
         release_data=$(gh release list --json \
           createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName)
-        if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
+        if [ -z "$release_data" ]; then
+          echo "Error: GitHub CLI command returned no results ❌"; exit 1
+        elif [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
           echo "Raw GitHub API query data 🐞"
           echo "$release_data"
         fi
@@ -87,27 +89,18 @@ runs:
 
         if [ -n "$sort_flags" ]; then
           echo "Sort flags/options: $sort_flags ⛳︎"
-          sorted_data=$(echo "$releases" | $jq_cmd \"$sort_flags | select\(.isDraft==true\)\")
+          draft_release=$(echo "$release_data" | $jq_cmd \".[0]$sort_flags | select\(.isDraft==true\)\")
         else
-          sorted_data=$(echo "$releases" | $jq_cmd 'select(.isDraft==true)')
+          draft_release=$(echo "$release_data" | $jq_cmd '.[0] | select(.isDraft==true)')
         fi
-        echo "$sorted_data"
-
-        if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
-          echo "Sorted GitHub API query data 🐞"
-          echo "$sorted_data"
-        fi
-
-        draft_release=$(echo "$sorted_data" | jq '.[0]')
+        echo "$draft_release"
 
         if [ -z "$draft_release" ]; then
-          echo "Error: no draft releases matched provided inputs ❌"
-          # Re-instate when finished debugging
-          # exit 1
-          exit 0
+          echo "Error: GitHub CLI command returned no results ❌"; exit 1
+        elif [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
+          echo "Sorted GitHub API query data 🐞"
+          echo "$draft_release"
         fi
-        echo "Draft release:"
-        echo "$draft_release"
 
         # Use of GitHub CLI requires a valid token
         echo "# Promote Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"

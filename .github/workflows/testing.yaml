@@ -56,21 +56,21 @@ jobs:
       # Promote release using local action
       - name: "Running local action: ${{ github.repository }}"
         with:
-          TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
         uses: ./
 
       # Promote release using local action
       - name: "Running local action: ${{ github.repository }} [Specific Tag]"
         with:
-          TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          TAG: 'v9.9.1'
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: 'v9.9.1'
         uses: ./
 
       # Promote release using local action
       - name: "Running local action: ${{ github.repository }} [Reverse Sort]"
         with:
-          TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          REVERSE_SORT: "true"
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          sort_reverse: "true"
         uses: ./
 
       # Validate draft release promotion
