@@ -79,14 +79,14 @@ runs:
           sort_flags=""
         elif [ -n "${{ inputs.SORT_BY }}" ]; then
           echo "Sorting by: ${{ inputs.SORT_BY }}"
-          sort_flags="sort_by(.${{ inputs.SORT_BY }})
-        elif [ -n "${{ inputs.SORT_REVERSE }}" ]; then
+          sort_flags="sort_by(.${{ inputs.SORT_BY }})"
+        elif [ "${{ inputs.SORT_REVERSE }}" == 'true' ]; then
           echo "Reverse sort order requested 🔄"
           sort_flags="$sort_flags|reverse"
         fi
 
         if [ -n "$sort_flags" ]; then
-          echo "Sort flags/options: $sort_flags "
+          echo "Sort flags/options: $sort_flags ⛳︎"
           sorted_data=$(echo "$releases" | $jq_cmd \"$sort_flags | select\(.isDraft==true\)\")
         else
           sorted_data=$(echo "$releases" | $jq_cmd "select\(.isDraft==true\)")
@@ -102,7 +102,8 @@ runs:
 
         if [ -z "$draft_release" ]; then
           echo "Error: no draft releases matched provided inputs ❌"
-          # exit 1 # Re-instate when finished debugging
+          # Re-instate when finished debugging
+          # exit 1
           exit 0
         fi
         echo "Draft release:"
