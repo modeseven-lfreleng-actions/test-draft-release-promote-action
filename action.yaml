@@ -85,11 +85,11 @@ runs:
         fi
 
         if [ -n "$sort_flags" ]; then
-          echo "Sort flags/options: $sort_flags 🏴‍☠️"
+          echo "Sort flags/options: $sort_flags "
         fi
 
         sorted_data=$(echo "$releases" |\
-          $jq_cmd \"$sort_flags | select(.isDraft==true))\"")
+          $jq_cmd \"$sort_flags | select(.isDraft==true)\")
         echo "$sorted_data"
 
         if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
