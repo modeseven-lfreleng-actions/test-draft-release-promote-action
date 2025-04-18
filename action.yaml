@@ -74,20 +74,20 @@ runs:
           echo "$release_data"
         fi
 
-        if [ -n "${{ inputs.SORT_BY }}" ]; then
+        if [ "${{ inputs.SORT_BY }}" == "none" ]; then
+          sort_flags=""
+        elif [ -n "${{ inputs.SORT_BY }}" ]; then
           echo "Sorting by: ${{ inputs.SORT_BY }}"
-          sort_flags="sort_by(.${{ inputs.SORT_BY }})"
+          sort_flags="sort_by(.${{ inputs.SORT_BY }})
         elif [ -n "${{ inputs.SORT_REVERSE }}" ]; then
           echo "Reverse sort order requested 🔄"
           sort_flags="$sort_flags|reverse"
         fi
 
-        json_cmd="$jq_cmd \"$sort_flags"
-
         # Example: jq "sort_by(.tagName) | select(.isDraft==true) $flags")
 
         sorted=$(echo "$releases" |\
-          $json_cmd | select(.isDraft==true))\""
+          $jq_cmd \"$sort_flags | select(.isDraft==true))\""
         echo "$sorted"
 
         if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
