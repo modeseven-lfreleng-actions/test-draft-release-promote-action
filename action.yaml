@@ -84,7 +84,6 @@ runs:
           sort_flags="$sort_flags|reverse"
         fi
 
-        # Example: jq "sort_by(.tagName) | select(.isDraft==true) $flags")
         if [ -n "$sort_flags" ]; then
           echo "Sort flags/options: $sort_flags 🏴‍☠️"
         fi
