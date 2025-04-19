@@ -102,6 +102,9 @@ runs:
           sorted_data="$drafts_only"
         fi
 
+        # Note: this is used when no tag/name are provided as inputs
+        # Starting point is the sorted set of data
+        draft_release="$sorted_data"
         # Perform element selection based on inputs
         if [ -n "$tag" ]; then
           draft_release=$(echo "$sorted_data" | jq "[.[] | select\(.tagName==\"$tag\"\)]")
