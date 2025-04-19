@@ -14,6 +14,10 @@ inputs:
     required: true
     type: 'string'
   # Optional
+  LATEST:
+    description: 'Mark as the latest release'
+    required: false
+    type: 'string'
   TAG:
     description: 'Tag of draft release to promote'
     required: false
@@ -103,7 +107,7 @@ runs:
         fi
         # Selection/filter options can be stacked
         if [ -n "$name" ]; then
-          selected_release=$(echo "$selected_release" | jq "[.[] | select(.tagName==\"$tag\")]")
+          selected_release=$(echo "$selected_release" | jq "[.[] | select(.name==\"$tag\")]")
         fi
 
         # Return first result from whatever element(s) remain
@@ -120,9 +124,16 @@ runs:
         # Promote release using tagName
         tagName=$(echo "$selected_release" | jq '.tagName' | sed 's:"::g')
 
-        release_url=$(gh release edit "$tagName" --draft=false)
+        # Set release as latest if requested by input
+        if [ "${{ inputs.LATEST }}" == true ]; then
+          release_flags="--latest"
+        else
+          unset release_flags
+        fi
+
+        release_url=$(gh release edit "$tagName" --draft=false $release_flags)
         if [ $# -eq 0 ]; then
-          echo "Release promoted: $release_url"
+          echo "Release promoted: $release_url ✅"
         else
           echo "Error: GitHub CLI failed to promote release ❌"; exit 1
         fi
@@ -130,3 +141,5 @@ runs:
         # Use of GitHub CLI requires a valid token
         echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
         echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
+        releases=$(gh releases list)
+        echo "PAYLOAD<<EOF"$'\n'"$releases"$'\n'EOF >> "$GITHUB_STEP_SUMMARY"

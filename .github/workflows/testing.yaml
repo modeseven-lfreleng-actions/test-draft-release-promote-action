@@ -40,6 +40,7 @@ jobs:
           gh release delete -y v9.9.2 || true
           gh release delete -y v9.9.3 || true
           gh release delete -y v9.9.4 || true
+          gh release delete -y v9.9.5 || true
 
       - name: "Create test releases"
         shell: bash
@@ -52,6 +53,7 @@ jobs:
           gh release create -d v9.9.1 -t "Test draft release v9.9.1"
           gh release create -d v9.9.2 -t "Test draft release v9.9.2"
           gh release create v9.9.4 -t "Test production release v9.9.4"
+          gh release create v9.9.5 -d -t "Test production release v9.9.5"
         # Production release URL example:
         # https://github.com/lfreleng-actions/draft-release-promote-action/releases/tag/v9.9.9
 
@@ -75,16 +77,27 @@ jobs:
           sort_reverse: "true"
         uses: ./
 
+      # Promote release using local action
+      - name: "Running local action: ${{ github.repository }} [By Tag/Name]"
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "v9.9.5"
+          name: "Test production release v9.9.5"
+        uses: ./
+
       # Validate draft release promotion
       - name: "Validate draft release promotion"
         shell: bash
         run: |
           # Validate draft release promotion
           # shellcheck disable=SC2086
-          URL="https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.1"
-          if (wget -q --spider $URL); then
-            echo "Release was successfully promoted ✅"
-          else
-            echo "Error: release was NOT promoted successfully ❌"
-            exit 1
-          fi
+          test() {
+            if (wget -q --spider $1); then
+              echo "Release was successfully promoted ✅"
+            else
+              echo "Error: release was NOT promoted successfully ❌"
+              exit 1
+            fi
+          }
+          test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.1"
+          test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.5"
