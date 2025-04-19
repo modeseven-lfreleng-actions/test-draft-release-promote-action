@@ -76,6 +76,7 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: 'v9.9.1'
           release_summary: false
+          latest: true
         uses: ./
 
       # Promote release using local action
@@ -84,7 +85,6 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
           sort_reverse: true
           release_summary: false
-          latest: true
         uses: ./
 
       # Promote release using local action
