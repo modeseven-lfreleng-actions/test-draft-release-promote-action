@@ -41,6 +41,7 @@ jobs:
           gh release delete -y v9.9.3 || true
           gh release delete -y v9.9.4 || true
           gh release delete -y v9.9.5 || true
+          gh release delete -y v9.9.6 || true
 
       - name: "Create test releases"
         shell: bash
@@ -50,6 +51,7 @@ jobs:
           # Create test releases; deliberately non-numerically ordered
           gh release create v9.8.0 -t "Test production release v9.8.0"
           gh release create v9.9.5 -d -t "Test draft release v9.9.5"
+          gh release create v9.9.6 -d -t "Test draft release v9.9.6"
           gh release create -d v9.9.3 -t "Test draft release v9.9.3"
           gh release create -d v9.9.1 -t "Test draft release v9.9.1"
           gh release create -d v9.9.2 -t "Test draft release v9.9.2"
@@ -85,9 +87,27 @@ jobs:
       - name: "Running local action: ${{ github.repository }} [By Tag/Name]"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v9.9.5"
-          name: "Test draft release v9.9.5"
+          tag: "v9.9.6"
+          name: "Test draft release v9.9.6"
         uses: ./
+
+      # Promote release using local action
+      - name: "Running local action: ${{ github.repository }} [Failure Test]"
+        id: failure
+        continue-on-error: true
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          tag: "v9.9.6"
+          name: "Test draft release v9.9.6"
+        uses: ./
+
+      - name: "Validate previous step failure"
+        if: steps.failure.outcome == 'success'
+        shell: bash
+        run: |
+          # Validate previous step failure
+          echo "Error: previous test step did NOT fail ❌"
+          exit 1
 
       # Validate draft release promotion
       - name: "Validate draft release promotion"
@@ -105,3 +125,4 @@ jobs:
           }
           test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.1"
           test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.5"
+          test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.6"
