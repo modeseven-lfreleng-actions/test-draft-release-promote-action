@@ -61,6 +61,7 @@ jobs:
       - name: "Running local action: ${{ github.repository }}"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
+          release_summary: false
         uses: ./
 
       # Promote release using local action
@@ -68,13 +69,16 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: 'v9.9.1'
+          release_summary: false
         uses: ./
 
       # Promote release using local action
       - name: "Running local action: ${{ github.repository }} [Reverse Sort]"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          sort_reverse: "true"
+          sort_reverse: true
+          release_summary: false
+          latest: true
         uses: ./
 
       # Promote release using local action

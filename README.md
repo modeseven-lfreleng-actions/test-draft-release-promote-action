@@ -48,29 +48,29 @@ The token needs the following permissions:
 
 Uses the GitHub CLI command:
 
-`gh release list --json name,tagName,createdAt,isDraft`
+`gh release list --json createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName`
 
 Example output:
 
 ```json
 [
   {
-    "createdAt": "2025-04-16T04:37:36Z",
+    "createdAt": "2025-04-18T05:19:03Z",
     "isDraft": true,
-    "name": "Draft release v0.1.1",
-    "tagName": "v0.1.1"
+    "isLatest": false,
+    "isPrerelease": false,
+    "name": "",
+    "publishedAt": "0001-01-01T00:00:00Z",
+    "tagName": "v9.9.3"
   },
   {
-    "createdAt": "2025-04-16T04:32:37Z",
-    "isDraft": true,
-    "name": "Draft release v0.1.0",
-    "tagName": "v0.1.0"
-  },
-  {
-    "createdAt": "2025-04-16T04:18:11Z",
+    "createdAt": "2025-04-17T11:45:14Z",
     "isDraft": false,
-    "name": "Release v0.0.1",
-    "tagName": "v0.0.1"
+    "isLatest": false,
+    "isPrerelease": false,
+    "name": "",
+    "publishedAt": "2025-04-19T05:00:04Z",
+    "tagName": "v9.9.0"
   }
 ]
 ```
