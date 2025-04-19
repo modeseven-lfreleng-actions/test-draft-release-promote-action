@@ -100,8 +100,8 @@ jobs:
       - name: "Running local action: ${{ github.repository }} [By Tag/Name]"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v9.9.5"
-          name: "Test draft release v9.9.5"
+          tag: "v9.9.6"
+          name: "Test draft release v9.9.6"
         uses: ./
 
       # Promote release using local action; failure test
@@ -111,8 +111,8 @@ jobs:
         continue-on-error: true
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v9.9.5"
-          name: "Test draft release v9.9.5"
+          tag: "v9.9.6"
+          name: "Test draft release v9.9.6"
         uses: ./
 
       - name: "Error if step above did NOT fail"
