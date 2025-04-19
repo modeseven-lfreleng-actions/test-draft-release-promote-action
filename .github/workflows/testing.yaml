@@ -14,6 +14,10 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ### Test the GitHub Action in this Repository ###
   tests:
@@ -87,8 +91,8 @@ jobs:
       - name: "Running local action: ${{ github.repository }} [By Tag/Name]"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v9.9.6"
-          name: "Test draft release v9.9.6"
+          tag: "v9.9.5"
+          name: "Test draft release v9.9.5"
         uses: ./
 
       # Promote release using local action
@@ -97,8 +101,8 @@ jobs:
         continue-on-error: true
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          tag: "v9.9.6"
-          name: "Test draft release v9.9.6"
+          tag: "v9.9.5"
+          name: "Test draft release v9.9.5"
         uses: ./
 
       - name: "Validate previous step failure"
