@@ -88,15 +88,3 @@ jobs:
             echo "Error: release was NOT promoted successfully ❌"
             exit 1
           fi
-
-      - name: "Delete test releases"
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Delete test releases
-          gh release delete -y v9.8.0
-          gh release delete -y v9.9.1
-          gh release delete -y v9.9.2
-          gh release delete -y v9.9.3
-          gh release delete -y v9.9.4
