@@ -108,10 +108,12 @@ runs:
         selected_release="$drafts_only"
         # Perform element selection based on inputs
         if [ -n "$tag" ]; then
+          echo "Selecting release by tag 🏷️"
           selected_release=$(echo "$selected_release" | jq "[.[] | select(.tagName==\"$tag\")]")
         fi
         # Selection/filter options can be stacked
         if [ -n "$name" ]; then
+          echo "Selecting release by name 🔤"
           selected_release=$(echo "$selected_release" | jq "[.[] | select(.name==\"$name\")]")
         fi
 

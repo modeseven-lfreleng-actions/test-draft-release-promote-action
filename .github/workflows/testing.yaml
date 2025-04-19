@@ -46,6 +46,7 @@ jobs:
           gh release delete -y v9.9.4 || true
           gh release delete -y v9.9.5 || true
           gh release delete -y v9.9.6 || true
+          gh release delete -y v9.9.7 || true
 
       - name: "Create test releases"
         shell: bash
@@ -56,6 +57,7 @@ jobs:
           gh release create v9.8.0 -t "Test production release v9.8.0"
           gh release create v9.9.5 -d -t "Test draft release v9.9.5"
           gh release create v9.9.6 -d -t "Test draft release v9.9.6"
+          gh release create v9.9.7 -d -t "Test draft release v9.9.7"
           gh release create -d v9.9.3 -t "Test draft release v9.9.3"
           gh release create -d v9.9.1 -t "Test draft release v9.9.1"
           gh release create -d v9.9.2 -t "Test draft release v9.9.2"
@@ -70,10 +72,18 @@ jobs:
         uses: ./
 
       # Promote release using local action
-      - name: "Running local action: ${{ github.repository }} [Specific Tag]"
+      - name: "Running local action: ${{ github.repository }} [by Tag / Latest]"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: 'v9.9.1'
+          latest: true
+        uses: ./
+
+      # Promote release using local action
+      - name: "Running local action: ${{ github.repository }} [By Name]"
+        with:
+          token: "${{ secrets.GITHUB_TOKEN }}"
+          name: 'Test draft release v9.9.3'
           latest: true
         uses: ./
 
@@ -127,3 +137,4 @@ jobs:
           test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.1"
           test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.5"
           test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.6"
+          test "https://github.com/$GITHUB_REPOSITORY/releases/tag/v9.9.3"
