@@ -50,8 +50,6 @@ runs:
       run: |
         # Capture draft releases in repository
 
-        set -vx
-
         tag="${{ inputs.tag }}"
         name="${{ inputs.name }}"
         sort_by="${{ inputs.sort_by }}"
@@ -145,16 +143,14 @@ runs:
 
         # Validate marking of latest release
         if [ "${{ inputs.latest }}" = 'true' ]; then
-          sleep 3
           release_data=$(gh release list --json \
             createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName)
           latest_release=$(echo $release_data | jq "[.[] | select(.isLatest==true)]")
           latest_tag=$(echo "$latest" | jq '.tagName' | sed 's:"::g')
-          echo "$tagName $latest_tag 🐞"
-          if [ "$tagName" = "$latest_tag" ]; then
-            echo "Designated as latest release ✅"
+          if [ "$tagName" != "$latest_tag" ]; then
+            echo "Successfully designated latest release ✅"
           else
-            echo "Failed to designate latest release ❌"
+            echo "Failed to designate as latest release ❌"
             exit 1
           fi
         fi
