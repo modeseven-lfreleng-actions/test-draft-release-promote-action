@@ -36,6 +36,7 @@ The token needs the following permissions:
 | Variable Name | Required | Description                            |
 | ------------- | -------- | -------------------------------------- |
 | TOKEN         | True     | GitHub token with relevant permissions |
+| LATEST        | False    | Mark as the latest release             |
 | TAG           | False    | Tag of draft release to promote        |
 | NAME          | False    | Name of draft release to promote       |
 | SORT_BY       | False    | Sort by this json element parameter    |
@@ -74,8 +75,14 @@ Example output:
 ]
 ```
 
-This is then passed through the JQ command:
+This is then passed through JQ commands to sort and filter the results.
 
-`jq` # Placeholder
+Some examples:
+
+`jq "[.[] | select(.isDraft==true)]"`
+
+`jq "sort_by(.tagName)"`
+
+`jq '. | reverse`
 
 ## Notes
