@@ -39,6 +39,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Delete test releases
+          set -x
           gh release delete -y v9.8.0 || true
           gh release delete -y v9.9.1 || true
           gh release delete -y v9.9.2 || true
@@ -54,6 +55,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Create test releases; deliberately non-numerically ordered
+          set -x
           gh release create v9.8.0 -t "Test production release v9.8.0"
           gh release create v9.9.5 -d -t "Test draft release v9.9.5"
           gh release create v9.9.6 -d -t "Test draft release v9.9.6"
