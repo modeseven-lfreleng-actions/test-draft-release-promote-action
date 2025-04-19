@@ -86,7 +86,6 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           name: 'Test draft release v9.9.3'
-          latest: true
         uses: ./
 
       # Promote release using local action
