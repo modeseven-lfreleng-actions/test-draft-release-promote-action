@@ -104,7 +104,8 @@ jobs:
           name: "Test draft release v9.9.5"
         uses: ./
 
-      # Promote release using local action
+      # Promote release using local action; failure test
+      # Note: promoted in the previous step, no longer listed as a draft
       - name: "Running local action: ${{ github.repository }} [Failure Test]"
         id: failure
         continue-on-error: true

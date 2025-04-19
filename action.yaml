@@ -131,11 +131,10 @@ runs:
         tagName=$(echo "$selected_release" | jq '.tagName' | sed 's:"::g')
         # Set release as latest if requested by input
         if [ "${{ inputs.latest }}" = 'true' ]; then
-          release_flags="--latest"
+          release_url=$(gh release edit "$tagName" --draft=false --latest || true)
         else
-          unset release_flags
+          release_url=$(gh release edit "$tagName" --draft=false || true)
         fi
-        release_url=$(gh release edit "$tagName" --draft=false $release_flags || true)
         if [ -n "$release_url" ]; then
           echo "Release promoted: $release_url ✅"
         else
