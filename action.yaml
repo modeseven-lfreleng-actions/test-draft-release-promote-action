@@ -104,11 +104,11 @@ runs:
 
         # Perform element selection based on inputs
         if [ -n "$tag" ]; then
-          draft_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]"
+          draft_release=$(echo "$sorted_data" | jq "[.[] | select\(.tagName==\"$tag\"\)]"
         fi
         # Selection/filter options can be stacked
         if [ -n "$name" ]; then
-          draft_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]"
+          draft_release=$(echo "$sorted_data" | jq "[.[] | select\(.tagName==\"$tag\"\)]"
         fi
 
         # Return first result from whatever element(s) remain
