@@ -99,11 +99,11 @@ runs:
         selected_release="$drafts_only"
         # Perform element selection based on inputs
         if [ -n "$tag" ]; then
-          selected_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]")
+          selected_release=$(echo "$selected_release" | jq "[.[] | select(.tagName==\"$tag\")]")
         fi
         # Selection/filter options can be stacked
         if [ -n "$name" ]; then
-          selected_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]")
+          selected_release=$(echo "$selected_release" | jq "[.[] | select(.tagName==\"$tag\")]")
         fi
 
         # Return first result from whatever element(s) remain
