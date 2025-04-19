@@ -17,7 +17,13 @@ inputs:
   LATEST:
     description: 'Mark as the latest release'
     required: false
-    type: 'string'
+    default: false
+    type: 'boolean'
+  RELEASE_SUMMARY:
+    description: 'After promotion, list releases in summary output'
+    required: false
+    default: true
+    type: 'boolean'
   TAG:
     description: 'Tag of draft release to promote'
     required: false
@@ -48,9 +54,6 @@ runs:
       # yamllint disable rule:line-length
       run: |
         # Capture draft releases in repository
-
-        # Disable script debugging prior to release
-        set -vx
 
         tag="${{ inputs.TAG }}"
         name="${{ inputs.NAME }}"
@@ -125,7 +128,7 @@ runs:
         tagName=$(echo "$selected_release" | jq '.tagName' | sed 's:"::g')
 
         # Set release as latest if requested by input
-        if [ "${{ inputs.LATEST }}" == true ]; then
+        if [ "${{ inputs.LATEST }}" = 'true' ]; then
           release_flags="--latest"
         else
           unset release_flags
@@ -141,5 +144,7 @@ runs:
         # Use of GitHub CLI requires a valid token
         echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
         echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
-        releases=$(gh releases list)
-        echo "PAYLOAD<<EOF"$'\n'"$releases"$'\n'EOF >> "$GITHUB_STEP_SUMMARY"
+        if [ "${{ inputs.RELEASE_SUMMARY }}" = 'true' ]; then
+          release_summary=$(gh release list)
+          echo "PAYLOAD<<EOF"$'\n'"$release_summary"$'\n'EOF >> "$GITHUB_STEP_SUMMARY"
+        fi
