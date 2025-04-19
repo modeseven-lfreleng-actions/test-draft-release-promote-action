@@ -65,13 +65,15 @@ runs:
 
         # Note: GitHub token must have permissions: "content: write"
         if [ -z "$GITHUB_TOKEN" ]; then
-          echo "Error: GitHub token not passed to action ❌"; exit 1
+          echo "Error: GitHub token not passed to action ❌"
+          exit 1
         fi
 
         # Check for JQ command
         jq_cmd=$(which jq)
         if [ ! -x "$jq_cmd" ]; then
-          echo "Error: jq command not found ❌"; exit 1
+          echo "Error: jq command not found ❌"
+          exit 1
         fi
 
         # Valid sort options provided by:
@@ -87,13 +89,18 @@ runs:
         release_data=$(gh release list --json \
           createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName)
         if [ -z "$release_data" ]; then
-          echo "Error: GitHub CLI command returned no results ❌"; exit 1
+          echo "Error: GitHub CLI command returned no results ❌"
+          exit 1
         elif [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
           echo "Raw GitHub API query data 🐞"
           echo "$release_data"
         fi
 
         drafts_only=$(echo $release_data | jq "[.[] | select(.isDraft==true)]")
+        if [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
+          echo "Selected draft releases 🐞"
+          echo "$drafts_only"
+        fi
 
         if [ "$sort_by" != "none" ]; then
           echo "Sorting releases by: $sort_by ⬇️"
@@ -118,9 +125,7 @@ runs:
 
         # Return first result from whatever element(s) remain
         selected_release=$(echo "$selected_release" | jq '.[0]')
-        echo "$selected_release"
-
-        if [ -z "$selected_release" ]; then
+        if [ "$selected_release" = 'null' ]; then
           echo "Error: GitHub CLI command returned no results ❌"
           exit 1
         elif [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then

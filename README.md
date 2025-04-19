@@ -84,5 +84,3 @@ Some examples:
 `jq "sort_by(.tagName)"`
 
 `jq '. | reverse`
-
-## Notes
