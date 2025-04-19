@@ -96,7 +96,7 @@ runs:
 
         if [ -n "$sort_flags" ]; then
           echo "Sorting with: $sort_flags"
-          sorted_data=$(echo "$drafts_only | jq "$sort_flags")
+          sorted_data=$(echo "$drafts_only" | jq "$sort_flags")
         else
           # No sorting requested
           sorted_data="$drafts_only"
