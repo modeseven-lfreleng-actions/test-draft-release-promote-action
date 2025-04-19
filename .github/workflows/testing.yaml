@@ -53,7 +53,7 @@ jobs:
           gh release create -d v9.9.1 -t "Test draft release v9.9.1"
           gh release create -d v9.9.2 -t "Test draft release v9.9.2"
           gh release create v9.9.4 -t "Test production release v9.9.4"
-          gh release create v9.9.5 -d -t "Test production release v9.9.5"
+          gh release create v9.9.5 -d -t "Test draft release v9.9.5"
         # Production release URL example:
         # https://github.com/lfreleng-actions/draft-release-promote-action/releases/tag/v9.9.9
 
@@ -86,7 +86,7 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: "v9.9.5"
-          name: "Test production release v9.9.5"
+          name: "Test draft release v9.9.5"
         uses: ./
 
       # Validate draft release promotion
