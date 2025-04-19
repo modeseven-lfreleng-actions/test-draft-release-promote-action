@@ -19,11 +19,6 @@ inputs:
     required: false
     default: false
     type: 'boolean'
-  RELEASE_SUMMARY:
-    description: 'After promotion, list releases in summary output'
-    required: false
-    default: true
-    type: 'boolean'
   TAG:
     description: 'Tag of draft release to promote'
     required: false
@@ -55,10 +50,10 @@ runs:
       run: |
         # Capture draft releases in repository
 
-        tag="${{ inputs.TAG }}"
-        name="${{ inputs.NAME }}"
-        sort_by="${{ inputs.SORT_BY }}"
-        sort_reverse="${{ inputs.SORT_REVERSE }}"
+        tag="${{ inputs.tag }}"
+        name="${{ inputs.name }}"
+        sort_by="${{ inputs.sort_by }}"
+        sort_reverse="${{ inputs.sort_reverse }}"
 
         # Note: GitHub token must have permissions: "content: write"
         if [ -z "$GITHUB_TOKEN" ]; then
@@ -133,7 +128,7 @@ runs:
         # Promote release using tagName
         tagName=$(echo "$selected_release" | jq '.tagName' | sed 's:"::g')
         # Set release as latest if requested by input
-        if [ "${{ inputs.LATEST }}" = 'true' ]; then
+        if [ "${{ inputs.latest }}" = 'true' ]; then
           release_flags="--latest"
         else
           unset release_flags
@@ -146,10 +141,20 @@ runs:
           exit 1
         fi
 
+        # Validate marking of latest release
+        if [ "${{ inputs.latest }}" = 'true' ]; then
+          release_data=$(gh release list --json \
+            createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName)
+          latest_release=$(echo $release_data | jq "[.[] | select(.isLatest==true)]")
+          latest_tag=$(echo "$latest" | jq '.tagName' | sed 's:"::g')
+          if [ "$tagName" = "$latest_tag" ]; then
+            echo "Designated as latest release ✅"
+          else
+            echo "Failed to designate latest release ❌"
+            exit 1
+          fi
+        fi
+
         # Summary output
         echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
         echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
-        if [ "${{ inputs.RELEASE_SUMMARY }}" = 'true' ]; then
-          release_summary=$(gh release list)
-          echo "PAYLOAD<<EOF"$'\n'"$release_summary"$'\n'EOF >> "$GITHUB_STEP_SUMMARY"
-        fi

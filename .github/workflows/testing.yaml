@@ -67,7 +67,6 @@ jobs:
       - name: "Running local action: ${{ github.repository }}"
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
-          release_summary: false
         uses: ./
 
       # Promote release using local action
@@ -75,7 +74,6 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           tag: 'v9.9.1'
-          release_summary: false
           latest: true
         uses: ./
 
@@ -84,7 +82,6 @@ jobs:
         with:
           token: "${{ secrets.GITHUB_TOKEN }}"
           sort_reverse: true
-          release_summary: false
         uses: ./
 
       # Promote release using local action
@@ -105,11 +102,11 @@ jobs:
           name: "Test draft release v9.9.5"
         uses: ./
 
-      - name: "Validate previous step failure"
+      - name: "Error if step above did NOT fail"
         if: steps.failure.outcome == 'success'
         shell: bash
         run: |
-          # Validate previous step failure
+          # Error if step above did NOT fail
           echo "Error: previous test step did NOT fail ❌"
           exit 1
 
