@@ -147,7 +147,7 @@ runs:
             createdAt,isDraft,isLatest,isPrerelease,name,publishedAt,tagName)
           latest_release=$(echo $release_data | jq "[.[] | select(.isLatest==true)]")
           latest_tag=$(echo "$latest" | jq '.tagName' | sed 's:"::g')
-          if [ "${{ inputs.latest }}" != "$latest_tag" ]; then
+          if [ "$tagName" != "$latest_tag" ]; then
             echo "Successfully designated latest release ✅"
           else
             echo "Failed to designate as latest release ❌"
