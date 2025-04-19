@@ -28,6 +28,7 @@ inputs:
     type: 'string'
     default: 'none'
   SORT_REVERSE:
+    # Note: reversal performed after sort_by operations
     description: 'Reverse sorting order'
     required: false
     type: 'boolean'
@@ -44,28 +45,18 @@ runs:
       run: |
         # Capture draft releases in repository
 
-        #SHELLCODESTART
-
         # Disable script debugging prior to release
         set -vx
 
-        # Allows for testing from a local shell
-        if [ -z "$GITHUB_OUTPUT" ]; then
-          echo "Running from a shell, NOT workflow"
-          export GITHUB_STEP_SUMMARY="/dev/null"
-          export GITHUB_OUTPUT="/dev/null"
-          export GITHUB_ENV="/dev/null"
-          SORT_BY="none"
-          SORT_REVERSE="false"
-        else
-          SORT_BY="${{ inputs.SORT_BY }}"
-          SORT_REVERSE="${{ inputs.SORT_REVERSE }}"
-        fi
+        tag="${{ inputs.TAG }}"
+        name="${{ inputs.NAME }}"
+        sort_by="${{ inputs.SORT_BY }}"
+        sort_reverse="${{ inputs.SORT_REVERSE }}"
 
         # Note: GitHub token must have permissions: "content: write"
-        # if [ -z "$GITHUB_TOKEN" ]; then
-        #  echo "Error: GitHub token not passed to action ❌"; exit 1
-        #fi
+        if [ -z "$GITHUB_TOKEN" ]; then
+          echo "Error: GitHub token not passed to action ❌"; exit 1
+        fi
 
         # Check for JQ command
         jq_cmd=$(which jq)
@@ -92,19 +83,36 @@ runs:
           echo "$release_data"
         fi
 
-        if [ "$SORT_BY" != "none" ]; then
-          echo "Sorting by: $SORT_BY"
-          sort_flags="sort_by($SORT_BY)"
+        drafts_only=$(echo $release_data | jq "[.[] | select(.isDraft==true)]")
+
+        if [ "$sort_by" != "none" ]; then
+          echo "Sorting releases by: $sort_by"
+          sort_flags="sort_by(.$sort_by)"
         fi
-        if [ "$SORT_REVERSE" == 'true' ]; then
+        if [ "$sort_reverse" == 'true' ]; then
           echo "Reverse sort order requested 🔄"
-          sort_flags="$sort_flags|reverse"
+          sort_flags="$sort_flags | reverse"
         fi
 
         if [ -n "$sort_flags" ]; then
-          echo "Sort flags/options: $sort_flags ⛳︎"
+          echo "Sorting with: $sort_flags"
+          sorted_data=$(echo "$drafts_only | jq "$sort_flags")
+        else
+          # No sorting requested
+          sorted_data="$drafts_only"
         fi
-        draft_release=$(jq -s "map(select(.isDraft == "true")) | first'
+
+        # Perform element selection based on inputs
+        if [ -n "$tag" ]; then
+          draft_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]"
+        fi
+        # Selection/filter options can be stacked
+        if [ -n "$name" ]; then
+          draft_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]"
+        fi
+
+        # Return first result from whatever element(s) remain
+        draft_release=$(echo "$draft_release" | jq '.[0]'
         echo "$draft_release"
 
         if [ -z "$draft_release" ]; then
@@ -114,9 +122,10 @@ runs:
           echo "$draft_release"
         fi
 
-        tag=$(echo $draft_release | jq '.tagName' | sed 's:"::g')
+        # Promote release using tagName
+        tagName=$(echo $draft_release | jq '.tagName' | sed 's:"::g')
 
-        release_url=$(gh release edit "$tag" --draft=false)
+        release_url=$(gh release edit "$tagName" --draft=false)
         if [ $# -eq 0 ]; then
           echo "Release promoted: $release_url"
         else
@@ -126,5 +135,3 @@ runs:
         # Use of GitHub CLI requires a valid token
         echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
         echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
-
-        #SHELLCODEEND
