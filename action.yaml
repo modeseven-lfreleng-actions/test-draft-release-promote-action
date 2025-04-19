@@ -86,47 +86,39 @@ runs:
         drafts_only=$(echo $release_data | jq "[.[] | select(.isDraft==true)]")
 
         if [ "$sort_by" != "none" ]; then
-          echo "Sorting releases by: $sort_by"
-          sort_flags="sort_by(.$sort_by)"
+          echo "Sorting releases by: $sort_by ⬇️"
+          drafts_only=$(echo "$drafts_only" | jq "sort_by(.$sort_by)")
         fi
-        if [ "$sort_reverse" == 'true' ]; then
-          echo "Reverse sort order requested 🔄"
-          sort_flags="$sort_flags | reverse"
-        fi
-
-        if [ -n "$sort_flags" ]; then
-          echo "Sorting with: $sort_flags"
-          sorted_data=$(echo "$drafts_only" | jq "$sort_flags")
-        else
-          # No sorting requested
-          sorted_data="$drafts_only"
+        if [ "$sort_reverse" == "true" ]; then
+          echo "Reversing result order 🔄"
+          drafts_only=$(echo "$drafts_only" | jq '. | reverse')
         fi
 
         # Note: this is used when no tag/name are provided as inputs
         # Starting point is the sorted set of data
-        draft_release="$sorted_data"
+        selected_release="$drafts_only"
         # Perform element selection based on inputs
         if [ -n "$tag" ]; then
-          draft_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]")
+          selected_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]")
         fi
         # Selection/filter options can be stacked
         if [ -n "$name" ]; then
-          draft_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]")
+          selected_release=$(echo "$sorted_data" | jq "[.[] | select(.tagName==\"$tag\")]")
         fi
 
         # Return first result from whatever element(s) remain
-        draft_release=$(echo "$draft_release" | jq '.[0]')
-        echo "$draft_release"
+        selected_release=$(echo "$selected_release" | jq '.[0]')
+        echo "$selected_release"
 
-        if [ -z "$draft_release" ]; then
+        if [ -z "$selected_release" ]; then
           echo "Error: GitHub CLI command returned no results ❌"; exit 1
         elif [ "$ACTIONS_STEP_DEBUG" == 'true' ]; then
           echo "Sorted GitHub API query data 🐞"
-          echo "$draft_release"
+          echo "$selected_release"
         fi
 
         # Promote release using tagName
-        tagName=$(echo $draft_release | jq '.tagName' | sed 's:"::g')
+        tagName=$(echo "$selected_release" | jq '.tagName' | sed 's:"::g')
 
         release_url=$(gh release edit "$tagName" --draft=false)
         if [ $# -eq 0 ]; then
