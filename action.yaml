@@ -159,5 +159,5 @@ runs:
         echo "# Promoted Draft Release ⏫" >> "$GITHUB_STEP_SUMMARY"
         echo "$release_url" >> "$GITHUB_STEP_SUMMARY"
         if [ "${{ inputs.latest }}" = 'true' ]; then
-          echo "Successfully designated latest release ✅"
+          echo "Successfully designated latest release ✅" >> "$GITHUB_STEP_SUMMARY"
         fi
