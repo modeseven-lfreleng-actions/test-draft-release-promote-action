@@ -55,9 +55,6 @@ runs:
       run: |
         # Capture draft releases in repository
 
-        # Remove debugging before submission
-        set -vx
-
         tag="${{ inputs.TAG }}"
         name="${{ inputs.NAME }}"
         sort_by="${{ inputs.SORT_BY }}"
